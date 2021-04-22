@@ -35,7 +35,10 @@ if(!$natom){die "You don't get the Atom Number!!!\n";}
 ################# energy ############
 #!    total energy              =    (-158.01049803) Ry
 	my @totalenergy = grep {if(m/^\s*!\s*total energy\s*=\s*([-+]?\d*\.?\d*)/){$_ = $1*$ry2eV;}} @all;
-    for (@totalenergy){chomp;print $eraw "$_\n";}
+    for (0..$#totalenergy){
+		print $eraw "$totalenergy[$_]";
+		print $eraw "\n" if ($_ ne $#totalenergy);
+	}
 ###virial (kbar)
 #   0.00000058  -0.00000001  -0.00000003            (0.09)       (-0.00)       (-0.00)
 	my @virial = grep {if(m/^\s*[-+]?\d+\.?\d+\s+[-+]?\d+\.?\d+\s+[-+]?\d+\.?\d+
@@ -44,7 +47,7 @@ if(!$natom){die "You don't get the Atom Number!!!\n";}
 	for (1..@virial){
 		chomp @{$virial[$_ -1]}[0..2];
 		print $vraw "@{$virial[$_ -1]}[0..2] ";
-		print $vraw "\n" if ($_% 3 == 0);
+		print $vraw "\n" if ($_% 3 == 0 and $_ ne scalar @virial);
 	}
 ############## force ############   #Ry/au
 ##     atom    1 type  1   force =     0.00000466    0.00000837    0.00000332
@@ -54,7 +57,7 @@ if(!$natom){die "You don't get the Atom Number!!!\n";}
 		#print "$_ @{$force[$_ -1]}[0..2]\n";
 		chomp @{$force[$_ -1]}[0..2];
 		print $fraw "@{$force[$_ -1]}[0..2] ";
-		print $fraw "\n" if ($_% $natom == 0);
+		print $fraw "\n" if ($_% $natom == 0 and $_ ne scalar @force);
 	}
 ############## coord ############
 ##ATOMIC_POSITIONS (angstrom)        
@@ -67,7 +70,7 @@ my @coord = grep {if(m/^\w+\s+([-+]?\d+\.?\d+)\s+([-+]?\d+\.?\d+)\s+([-+]?\d+\.?
 		if(! grep /$mod/,(1..$natom*2)){
 			chomp @{$coord[$_ -1]}[0..2];
 			print $craw "@{$coord[$_ -1]}[0..2] ";
-			print $craw "\n" if ($mod == 0);
+			print $craw "\n" if ($mod == 0 and $_ ne scalar @coord);
 		}
 	}
 ############## box ############
@@ -77,11 +80,11 @@ my @box = grep {if(m/^\s{1,3}([-+]?\d+\.?\d+)\s+([-+]?\d+\.?\d+)\s+([-+]?\d+\.?\
 			$_ = [$1,$2,$3];}} @all;
 	for (1..@box){
 		#print "$_ @{$box[$_ -1]}[0..2]\n";
-		my $mod = $_ % ($natom*3);
+		my $mod = $_ % 6;
 		if(! grep /$mod/,(1..3)){
 			chomp @{$box[$_ -1]}[0..2];
 			print $braw "@{$box[$_ -1]}[0..2] ";
-			print $braw "\n" if ($mod == 0);
+			print $braw "\n" if ($mod == 0 and $_ ne scalar @box);
 		}
 	}
 # end of qe2dpmd convertion
